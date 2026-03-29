@@ -15,7 +15,6 @@ app.use(cors({
 
 app.use(express.json());
 
-// 1. Initialize the NEW SDK correctly
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.post('/api/chat', async (req, res) => {
@@ -24,7 +23,6 @@ app.post('/api/chat', async (req, res) => {
     const { messages } = req.body;
     const latestMessage = messages[messages.length - 1].text;
     
-    // Format history: Google requires 'user' or 'model' (not 'bot')
     const history = messages.slice(0, -1)
       .filter((msg, index) => !(index === 0 && msg.role === 'bot'))
       .map(msg => ({
@@ -32,15 +30,12 @@ app.post('/api/chat', async (req, res) => {
         parts: [{ text: msg.text }]
       }));
 
-    // 2. Use the NEW SDK chat creation syntax
     const chat = ai.chats.create({
       model: "gemini-2.5-flash", 
       history: history,
     });
 
-    // 3. Send the message and await the response
     const response = await chat.sendMessage({ message: latestMessage });
-    
     console.log("✅ AI Responded successfully");
     res.json({ text: response.text });
 
@@ -50,10 +45,8 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Render provides the PORT automatically
+// THIS IS THE FIX RENDER NEEDS
 const PORT = process.env.PORT || 3001;
-
-// Use 0.0.0.0 so the internet can actually reach the server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server is live on port ${PORT}`);
+  console.log(`🚀 Server ready at http://0.0.0.0:${PORT}`);
 });
