@@ -1,7 +1,7 @@
 export const getGeminiResponse = async (messages) => {
   try {
-    // Notice how simple the fetch URL is now!
-    const response = await fetch('/api/chat', {
+    // YOU MUST USE THE FULL RENDER URL HERE
+    const response = await fetch('https://ai-chat-backend-r8e8.onrender.com/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
