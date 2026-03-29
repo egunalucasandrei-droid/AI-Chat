@@ -50,7 +50,10 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-const PORT = 3001;
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`🚀 Server ready at http://127.0.0.1:${PORT}`);
+// This tells the server to use Render's assigned port OR 3001
+const PORT = process.env.PORT || 3001;
+
+// Use '0.0.0.0' instead of '127.0.0.1' so the internet can talk to it
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server ready at http://0.0.0.0:${PORT}`);
 });
