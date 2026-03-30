@@ -1,24 +1,19 @@
 export const getGeminiResponse = async (messages) => {
   try {
-    // YOU MUST USE THE FULL RENDER URL HERE
-    const response = await fetch('https://ai-chat-backend-r8e8.onrender.com/api/chat', {
+    // Vercel handles the routing automatically!
+    const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || `Server Error: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+    
     const data = await response.json();
     return data.text;
 
   } catch (error) {
-    console.error("Frontend Fetch Error:", error);
+    console.error("Fetch Error:", error);
     throw new Error(error.message);
   }
 };
