@@ -8,7 +8,6 @@ export default async function handler(req, res) {
 
     const { messages } = req.body;
 
-    // Translate your frontend conversation history into Google's required format
     const geminiHistory = messages.map(msg => ({
       role: msg.sender === 'bot' ? 'model' : 'user',
       parts: [{ text: msg.text }]
@@ -25,7 +24,10 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (data.error) {
-      return res.status(200).json({ text: `GOOGLE ERROR: ${data.error.message}` });
+      if (data.error.message.toLowerCase().includes('quota')) {
+        return res.status(200).json({ text: "Whoa there! ⚡ You're chatting a little too fast. Please wait about 10 seconds and try again." });
+      }
+      return res.status(200).json({ text: `Oops! Something went wrong: ${data.error.message}` });
     }
 
     const text = data.candidates[0].content.parts[0].text;

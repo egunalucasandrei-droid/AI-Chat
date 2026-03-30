@@ -34,7 +34,6 @@ export default function App() {
     setMessages(newMessages);
     setLoading(true);
 
-    // Auto-Retry logic for handling temporary server overloads (503 errors)
     const fetchResponse = async (retryCount = 0) => {
       try {
         const response = await getGeminiResponse(newMessages);
@@ -42,10 +41,8 @@ export default function App() {
         setLoading(false); // Stop loading on success
       } catch (err) {
         if (err.message.includes("503") && retryCount < 2) {
-          // If servers are busy, wait 3 seconds and try again silently
           setTimeout(() => fetchResponse(retryCount + 1), 3000);
         } else {
-          // If it fails 3 times, or if it's a different error (like 429), show it
           setError(err.message);
           setLoading(false);
         }
