@@ -1,13 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
 const app = express();
 
-// Required for GitHub Pages to talk to Render
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST'],
@@ -16,28 +14,37 @@ app.use(cors({
 
 app.use(express.json());
 
-// Use the variable name from your Environment Variables in Render
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    // Get the last message text
     const prompt = messages[messages.length - 1].text;
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    
-    res.json({ text: response.text() });
+    // Unbreakable Direct API Call (Bypasses all SDK package errors)
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+        console.error("Google API Error:", data.error.message);
+        return res.status(500).json({ error: data.error.message });
+    }
+
+    const text = data.candidates[0].content.parts[0].text;
+    res.json({ text });
+
   } catch (error) {
-    console.error("Gemini Error:", error);
-    res.status(500).json({ error: "AI failed to respond" });
+    console.error("Backend Error:", error);
+    res.status(500).json({ error: "Server crashed" });
   }
 });
 
-// MANDATORY FOR RENDER DEPLOYMENT
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is live on port ${PORT}`);
