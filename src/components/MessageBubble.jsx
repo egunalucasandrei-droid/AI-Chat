@@ -22,7 +22,7 @@ export default function MessageBubble({ message, isDarkMode }) {
           {isUser ? (
             <div className="whitespace-pre-wrap">{message.text}</div>
           ) : (
-            // FIX: Added !bg-transparent and !text-inherit to stop external markdown CSS from hijacking the colors
+            
             <div className="markdown-body bg-transparent! text-inherit! transition-colors duration-500">
               <ReactMarkdown>{message.text}</ReactMarkdown>
             </div>

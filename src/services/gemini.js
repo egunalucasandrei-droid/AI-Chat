@@ -1,6 +1,5 @@
 export const getGeminiResponse = async (messages) => {
   try {
-    // Vercel handles the routing automatically!
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
