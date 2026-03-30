@@ -1,31 +1,37 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-
   try {
-    const { messages } = req.body;
-    const prompt = messages[messages.length - 1].text;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // Direct Google API Call
+    if (!apiKey) {
+      return res.status(200).json({ text: "ERROR: Vercel cannot find the API Key." });
+    }
+
+    const { messages } = req.body;
+
+    // Translate your frontend conversation history into Google's required format
+    const geminiHistory = messages.map(msg => ({
+      role: msg.sender === 'bot' ? 'model' : 'user',
+      parts: [{ text: msg.text }]
+    }));
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: geminiHistory
       })
     });
 
     const data = await response.json();
-    
+
     if (data.error) {
-      return res.status(500).json({ error: data.error.message });
+      return res.status(200).json({ text: `GOOGLE ERROR: ${data.error.message}` });
     }
 
     const text = data.candidates[0].content.parts[0].text;
     res.status(200).json({ text });
 
   } catch (error) {
-    console.error("Vercel API Error:", error);
-    res.status(500).json({ error: "Server crashed" });
+    res.status(200).json({ text: `SERVER CRASHED: ${error.message}` });
   }
 }
